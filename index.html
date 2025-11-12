@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Body Massager - Exclusive Pay On Delivery Offer</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Tailwind Configuration */
+        :root {
+            --red-main: 239 68 68; /* Tailwind red-600 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff; /* Tailwind slate-50 */
+            transition: background-color 0.3s;
+        }
+        /* Dark Mode Styles */
+        body.dark {
+            background-color: #1f2937; /* Tailwind gray-800 */
+            color: #fcfcfc; /* Tailwind gray-100 */
+        }
+        body.dark .text-gray-900 { color: #f8f8ff; }
+        body.dark .text-gray-700 { color: #ffffff; }
+        body.dark .bg-white { background-color: #374151; /* Tailwind gray-700 */ }
+        body.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.2); }
+        body.dark .border-gray-300 { border-color: #4b5563; }
+        body.dark input, body.dark textarea { background-color: #d2d4d8; color: rgb(245, 239, 239); }
+
+        /* Sticky Components Styling */
+        #announcement-bar { z-index: 50; }
+        #cta-bar-wrapper { z-index: 40; }
+        
+        /* 3D Flip Card Styles */
+        #flip-card {
+            perspective: 1000px;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        #flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .flipped #flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Modal Styles */
+        .modal-card {
+            max-width: 90%;
+            width: 500px;
+            max-height: 90vh; /* Fixed height relative to viewport */
+            display: flex;
+            flex-direction: column;
+            
+        }
+        .modal-content-scrollable {
+            overflow-y: auto; /* Scrollable inner content */
+            flex-grow: 1;
+        }
+
+        /* Carousel Styles */
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .carousel-item {
+            min-width: 100%;
+        }
+
+        /* Custom animation for the Order Button pop-out on reverse scroll */
+        .cta-btn-pop-in {
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .cta-btn-visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Custom scroll class for smooth validation redirect */
+        .quantity-highlight {
+            border: 4px solid rgb(var(--red-main));
+            box-shadow: 0 0 20px rgb(var(--red-main) / 0.7);
+            animation: pulse-red 1s infinite alternate;
+        }
+
+        @keyframes pulse-red {
+            from { box-shadow: 0 0 10px rgb(var(--red-main) / 0.5); }
+            to { box-shadow: 0 0 30px rgb(var(--red-main) / 0.9); }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- A. Sticky Header Components -->
+
+    <!-- A1. Announcement Bar (Sticky Top) - Removed 'whitespace-nowrap' for mobile fix -->
+    <div id="announcement-bar" class="sticky top-0 w-full bg-red-600 text-white text-center text-sm p-2 overflow-hidden shadow-lg">
+        <span id="announcement-text" class="font-semibold transition-all duration-500 ease-in-out">
+            <!-- Content filled by JS -->
+        </span>
+    </div>
+
+    <!-- A2. CTA Bar (Sticky Below Announcement Bar) -->
+    <div id="cta-bar-wrapper" class="sticky top-[40px] w-full bg-red-500 p-3 shadow-2xl transition-all duration-300 transform-gpu translate-y-0" style="z-index: 40;">
+        <div class="max-w-7xl mx-auto flex justify-between items-center space-x-2 sm:space-x-4">
+            <!-- New: Theme Switch Button -->
+            <button id="theme-toggle" class="text-white hover:text-yellow-400 p-2 rounded-full transition-colors order-3 sm:order-1" onclick="toggleDarkMode()">
+                <!-- Sun Icon (Default/Light Mode) -->
+                <svg id="sun-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <!-- Moon Icon (Dark Mode) -->
+                <svg id="moon-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+            </button>
+            
+            <!-- Countdown Timer -->
+            <div class="flex items-center text-white font-extrabold text-xs sm:text-lg order-1 sm:order-2">
+                <span class="mr-1 sm:mr-2 hidden md:inline">FREE Delivery Time Left:</span>
+                <span id="countdown" class="bg-white text-red-600 py-1 px-2 sm:px-3 rounded-lg">00:00:00</span>
+            </div>
+
+            <!-- New: Button Group (Second 'Order Now' button added) -->
+            <div class="flex space-x-1 sm:space-x-2 order-2 sm:order-3">
+                 <!-- Secondary Button (Quick Order) -->
+                <button class="hidden sm:inline-block bg-white text-red-600 font-bold py-2 px-3 rounded-full shadow-xl hover:bg-gray-100 transition-colors text-sm whitespace-nowrap" onclick="openModal('cta-bar-extra')">
+                    Quick Order
+                </button>
+                <!-- Primary Button (The one that pops out first) -->
+                <button id="cta-bar-button" class="cta-btn-pop-in bg-yellow-400 text-red-900 font-black py-2 px-4 sm:px-5 rounded-full shadow-xl hover:bg-yellow-300 transition-colors text-sm sm:text-lg whitespace-nowrap" onclick="openModal('sticky-header')">
+                    <span class="inline-block animate-bounce mr-1">🎁</span> Order Now!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- B. Core Body and CTAs -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- 3D Product Visual & Hero (B1) -->
+        <section class="grid md:grid-cols-2 gap-8 items-center pt-10 pb-16">
+            <div class="aspect-square bg-white p-6 rounded-3xl shadow-2xl">
+                <div id="flip-card" onclick="flipCard()">
+                    <div id="flip-card-inner">
+                        <!-- Front Face -->
+                        <div class="flip-card-face flip-card-front bg-gray-100 flex items-center justify-center">
+                            <img src="https://placehold.co/600x600/fecaca/991b1b?text=Massager+Front+View" alt="Mini Massager Front" class="w-full h-auto object-cover rounded-3xl">
+                        </div>
+                        <!-- Back Face -->
+                        <div class="flip-card-face flip-card-back bg-gray-100 flex items-center justify-center">
+                            <img src="https://placehold.co/600x600/bbf7d0/065f46?text=Massager+Back+Pads" alt="Mini Massager Back Pads" class="w-full h-auto object-cover rounded-3xl">
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-4">Click/Tap to see the back side!</p>
+            </div>
+            
+            <div class="space-y-6">
+                <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+                    End Muscle Pain Instantly.
+                </h1>
+                <p class="text-2xl text-red-600 font-semibold">
+                    The Revolutionary Mini Body Massager — Powerful Relief in Your Pocket.
+                </p>
+                <ul class="space-y-3 text-lg text-gray-700">
+                    <li class="flex items-center"><span class="text-green-500 mr-3 text-2xl">✓</span> Micro-Current Deep Tissue Technology</li>
+                    <li class="flex items-center"><span class="text-green-500 mr-3 text-2xl">✓</span> 8 Massage Modes for Custom Relief</li>
+                    <li class="flex items-center"><span class="text-green-500 mr-3 text-2xl">✓</span> Rechargeable & Silent Operation</li>
+                    <li class="flex items-center"><span class="text-green-500 mr-3 text-2xl">✓</span> Pay On Delivery Guarantee Nationwide</li>
+                </ul>
+                <!-- Centered CTA -->
+                <div class="text-center">
+                    <button class="w-full max-w-sm bg-red-600 text-white font-bold py-4 rounded-xl text-xl shadow-xl hover:bg-red-700 transition-colors mx-auto block" onclick="openModal('hero-section')">
+                        Order Now & Secure Free Delivery
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Marketing Section (B2) - Already centered via text-center -->
+        <section class="py-16 text-center">
+            <button class="bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-md hover:bg-red-700 mb-8" onclick="openModal('marketing-section')">
+                Order Now - Limited Stock!
+            </button>
+            <h2 class="text-4xl font-extrabold text-gray-900 mb-6">Stop Suffering. Start Living Pain-Free.</h2>
+            <p class="text-xl text-gray-700 max-w-4xl mx-auto">
+                Don't let muscle stiffness and chronic pain dictate your day. This small device is scientifically proven to stimulate nerve endings, block pain signals, and release tension, giving you professional-grade relief without the expensive clinic visits.
+            </p>
+        </section>
+
+        <!-- Video Placeholder (B3) - Centered CTA -->
+        <section class="py-16 text-center">
+            <button class="bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-md hover:bg-red-700 mb-8" onclick="openModal('video-section')">
+                Order Now & Watch Pain Disappear
+            </button>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">See the Massager in Action</h2>
+            <div class="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border-4 border-red-500 bg-black flex items-center justify-center">
+                <span class="text-white text-3xl font-bold">PRODUCT VIDEO DEMO FRAME</span>
+                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                    <svg class="w-24 h-24 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Offer Section (B4) - Centered CTA -->
+        <section class="py-16 bg-red-50 rounded-xl p-8 border-l-8 border-red-600 text-center">
+            <button class="bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-md hover:bg-red-700 mb-8" onclick="openModal('offer-section')">
+                Order Now & Claim Your Bonus
+            </button>
+            <h2 class="text-3xl font-bold text-red-600 mb-6">Exclusive Offer: FREE Bonus Pack Today Only!</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center text-left">
+                <p class="text-lg text-gray-700">
+                    When you order now, you don't just get the massager; you receive a **FREE 4-Pad Replacement Set** and a **Digital Pain Relief Guide**—a total value of ₦5,000, absolutely free. This offer is only available while this announcement is live!
+                </p>
+                <div class="bg-white p-4 rounded-xl shadow-lg flex items-center justify-center">
+                    <img src="https://placehold.co/400x200/4d7c0f/ecfccb?text=Free+Bonus+Pack+Image" alt="Bonus Pack Image" class="w-full max-w-xs rounded-lg">
+                </div>
+            </div>
+        </section>
+
+        <!-- Image Carousel (B5) -->
+        <section class="py-16">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Product 360° View</h2>
+            <div class="relative overflow-hidden rounded-xl shadow-2xl bg-gray-200">
+                <div id="carousel-track" class="carousel-track">
+                    <!-- Carousel Items (5 placeholder images) -->
+                    <div class="carousel-item"><img src="https://placehold.co/800x450/1e293b/f1f5f9?text=Angle+1" class="w-full h-auto" alt="Product Angle 1"></div>
+                    <div class="carousel-item"><img src="https://placehold.co/800x450/475569/f1f5f9?text=Angle+2" class="w-full h-auto" alt="Product Angle 2"></div>
+                    <div class="carousel-item"><img src="https://placehold.co/800x450/64748b/f1f5f9?text=Angle+3" class="w-full h-auto" alt="Product Angle 3"></div>
+                    <div class="carousel-item"><img src="https://placehold.co/800x450/94a3b8/f1f5f9?text=Angle+4" class="w-full h-auto" alt="Product Angle 4"></div>
+                    <div class="carousel-item"><img src="https://placehold.co/800x450/cbd5e1/1e293b?text=Angle+5" class="w-full h-auto" alt="Product Angle 5"></div>
+                </div>
+                <!-- Navigation Dots -->
+                <div id="carousel-dots" class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                    <!-- Dots added by JS -->
+                </div>
+                <!-- Prev/Next Buttons (Optional but helpful) -->
+                <button class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full" onclick="moveCarousel(-1)">&#10094;</button>
+                <button class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full" onclick="moveCarousel(1)">&#10095;</button>
+            </div>
+        </section>
+
+        <!-- About Product / Description Section (B6) - Centered CTA -->
+        <section class="py-16 text-center">
+            <button class="bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-md hover:bg-red-700 mb-8" onclick="openModal('description-section')">
+                Order Now & Feel the Difference
+            </button>
+            <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Detailed Product Specifications</h2>
+            <div class="grid md:grid-cols-3 gap-8 text-center bg-white p-8 rounded-xl shadow-lg">
+                <div>
+                    <span class="text-4xl text-red-600 mb-3 block">⚙️</span>
+                    <h3 class="font-bold text-xl mb-2">Technology</h3>
+                    <p class="text-gray-600">Advanced TENS/EMS Micro-current Pulse (8 Modes, 19 Intensity Levels).</p>
+                </div>
+                <div>
+                    <span class="text-4xl text-red-600 mb-3 block">⏱️</span>
+                    <h3 class="font-bold text-xl mb-2">Battery</h3>
+                    <p class="text-gray-600">Built-in rechargeable lithium battery. 5-hour runtime per charge. USB compatible.</p>
+                </div>
+                <div>
+                    <span class="text-4xl text-red-600 mb-3 block">⚖️</span>
+                    <h3 class="font-bold text-xl mb-2">Portability</h3>
+                    <p class="text-gray-600">Ultra-lightweight (less than 50g) and palm-sized. Take it anywhere discreetly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quantity Selection Section (B7) -->
+        <section id="quantity-selection-section" class="py-16 bg-red-600 rounded-xl shadow-2xl p-8 my-12">
+            <h2 class="text-4xl font-extrabold text-white mb-8 text-center">Choose Your Best Value Pack</h2>
+            <div id="quantity-options" class="grid md:grid-cols-3 gap-6">
+                <!-- Quantity options filled by JS -->
+            </div>
+            <div class="mt-8 text-center">
+                <button class="bg-yellow-400 text-red-900 font-black py-4 px-12 rounded-full text-2xl shadow-2xl hover:bg-yellow-300 transition-colors transform hover:scale-105" onclick="openModal('quantity-section-final')">
+                    Order Now & Pay On Delivery!
+                </button>
+            </div>
+        </section>
+        
+        <!-- Form 2 (last page section - C2) -->
+        <section id="final-order-form-section" class="py-16 bg-white rounded-xl shadow-xl p-8 mb-12 border-t-8 border-gray-200">
+            <h2 class="text-3xl font-extrabold text-gray-900 mb-6 text-center">Final Checkout (Pay On Delivery)</h2>
+            <p id="selected-qty-summary-final" class="text-center text-xl font-bold text-red-600 mb-6">
+                <!-- Summary inserted by JS validation -->
+            </p>
+            
+            <form id="form-2-submission" action="https://formspree.io/f/placeholder_form_2" method="POST" class="max-w-xl mx-auto space-y-6">
+                <input type="hidden" name="Source" value="Final Section Form">
+                <input type="hidden" name="Quantity_Selected_ID" id="form-2-quantity-id">
+                <input type="hidden" name="Price_Total" id="form-2-price-total">
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="f2_name" class="block text-sm font-semibold text-gray-700">Full Name *</label>
+                        <input type="text" id="f2_name" name="Full Name" required class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    <div>
+                        <label for="f2_whatsapp" class="block text-sm font-semibold text-gray-700">WhatsApp Number *</label>
+                        <input type="tel" id="f2_whatsapp" name="WhatsApp Number" required class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="e.g. 080 XXXX XXXX">
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="f2_alt_phone" class="block text-sm font-semibold text-gray-700">Alternative Phone</label>
+                        <input type="tel" id="f2_alt_phone" name="Alternative Number" class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="Optional">
+                    </div>
+                    <div>
+                        <label for="f2_region" class="block text-sm font-semibold text-gray-700">Region/State *</label>
+                        <input type="text" id="f2_region" name="Region/State" required class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="e.g. Lagos, Abuja">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="f2_address" class="block text-sm font-semibold text-gray-700">Full Delivery Address *</label>
+                    <textarea id="f2_address" name="Full Address" rows="3" required class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="House/Street/Landmark"></textarea>
+                </div>
+                
+                <div>
+                    <label for="f2_note" class="block text-sm font-semibold text-gray-700">Order Note</label>
+                    <textarea id="f2_note" name="Order Note" rows="2" class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="Delivery time preference, etc."></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-green-600 text-white font-black py-4 rounded-xl text-2xl shadow-lg hover:bg-green-700 transition-colors transform hover:scale-[1.01]">
+                    Complete Order & Pay On Delivery
+                </button>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-6 text-center">
+        <p class="text-sm">&copy; 2024 Mini Massager Nigeria. All Rights Reserved. Pay On Delivery.</p>
+    </footer>
+
+    <!-- Form 1 Pop-up Modal (C1) -->
+    <div id="order-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center p-4" onclick="closeModal(event)">
+        <div class="modal-card bg-white rounded-2xl shadow-2xl p-6 transition-all transform scale-100">
+            <div class="flex justify-between items-center pb-4 border-b">
+                <h3 class="text-2xl font-extrabold text-red-600">SECURE YOUR ORDER</h3>
+                <button class="text-gray-400 hover:text-gray-600" onclick="document.getElementById('order-modal').classList.add('hidden')">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="modal-content-scrollable pt-4">
+                <form id="form-1-submission" action="https://formspree.io/f/placeholder_form_1" method="POST" class="space-y-5">
+                    <input type="hidden" name="Source" id="form-1-source" value="Modal Form">
+                    <input type="hidden" name="Quantity_Selected_ID" id="form-1-quantity-id">
+                    <input type="hidden" name="Price_Total" id="form-1-price-total">
+
+                    <!-- Quantity Selection Inside Modal -->
+                    <div>
+                        <label class="block text-lg font-bold text-gray-800 mb-3">1. Select Your Pack *</label>
+                        <div id="modal-quantity-options" class="space-y-3">
+                            <!-- Options filled by JS -->
+                        </div>
+                    </div>
+                    
+                    <h4 class="text-lg font-bold text-gray-800 pt-3 border-t">2. Delivery Information</h4>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="f1_name" class="block text-sm font-semibold text-gray-700">Full Name *</label>
+                            <input type="text" id="f1_name" name="Full Name" required class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500">
+                        </div>
+                        <div>
+                            <label for="f1_whatsapp" class="block text-sm font-semibold text-gray-700">WhatsApp Number *</label>
+                            <input type="tel" id="f1_whatsapp" name="WhatsApp Number" required class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="e.g. 080 XXXX XXXX">
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="f1_alt_phone" class="block text-sm font-semibold text-gray-700">Alternative Phone</label>
+                            <input type="tel" id="f1_alt_phone" name="Alternative Number" class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="Optional">
+                        </div>
+                        <div>
+                            <label for="f1_region" class="block text-sm font-semibold text-gray-700">Region/State *</label>
+                            <input type="text" id="f1_region" name="Region/State" required class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="e.g. Lagos, Abuja">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="f1_address" class="block text-sm font-semibold text-gray-700">Full Delivery Address *</label>
+                        <textarea id="f1_address" name="Full Address" rows="3" required class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="House/Street/Landmark"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="f1_note" class="block text-sm font-semibold text-gray-700">Order Note</label>
+                        <textarea id="f1_note" name="Order Note" rows="2" class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-red-500 focus:border-red-500" placeholder="Delivery time preference, etc."></textarea>
+                    </div>
+
+                    <p id="modal-price-summary" class="text-center text-xl font-bold text-red-600 border-t pt-4">
+                        <!-- Summary inserted by JS -->
+                    </p>
+
+                    <button type="submit" class="w-full bg-red-600 text-white font-black py-4 rounded-xl text-2xl shadow-lg hover:bg-red-700 transition-colors">
+                        CONFIRM ORDER (PAY ₦<span id="modal-total-price">0</span> ON DELIVERY)
+                    </button>
+                    <p class="text-center text-xs text-gray-500">Form submitted securely via Formspree.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Configuration & Global State ---
+        const ANNOUNCEMENTS = [
+            { text: "Mini Body Massager - ⭐⭐⭐⭐⭐ (4.9/5) Rated by 12,000+ Nigerians!", initial: true },
+            { text: "Mrs. Kemi Johnson from Abuja just bought 2 units 5 minutes ago." },
+            { text: "Mr. Emeka Obi from Port Harcourt just secured 3 units 1 hour ago." },
+            { text: "Miss Amara Eze from Enugu just bought 1 Mini Massager 30 minutes ago." },
+            { text: "Mr. Sunday Odi from Lagos just bought 3 Mini Body Massagers 2 hours ago." },
+            { text: "Quick! Only 18 units left at this special promo price!", alert: true },
+            { text: "Limited Stock! Free shipping ends tonight at midnight.", alert: true },
+            { text: "Mrs. Funke Adeyemi from Ibadan just bought 1 unit 45 minutes ago." },
+            { text: "Mr. John Idowu from Kano just bought 2 Mini Massagers 3 hours ago." },
+            { text: "Miss Blessing Nwafor from Delta just secured 1 unit 15 minutes ago." },
+            { text: "Last chance to get the exclusive Bonus Package!", alert: true },
+            { text: "We offer 100% Pay On Delivery (POD) for peace of mind." },
+            { text: "Mr. Hassan Bello from Kaduna just bought 2 units 7 minutes ago." },
+            { text: "Mrs. Chioma Okoro from Anambra just secured 1 Mini Massager 1 hour ago." },
+            { text: "Miss Zara Mustapha from Sokoto just bought 3 units 4 hours ago." },
+        ];
+
+        const OFFERS = [
+            { id: 'qty1', qty: 1, price: 15000, promo: 'Standard Pack', savings: 0, description: 'Perfect for personal use. Best for testing the product.' },
+            { id: 'qty2', qty: 2, price: 28000, promo: 'Couples Pack', savings: 2000, description: 'Save ₦2,000. Get one for a loved one. Most popular option!' },
+            { id: 'qty3', qty: 3, price: 39000, promo: 'Family Pack', savings: 6000, description: 'Save ₦6,000! Great for sharing with the whole family. Best value!' },
+        ];
+        
+        // Global state to track selected quantity ID from the main body section (B7)
+        let selectedQuantityId = null;
+
+        // --- Utility Functions ---
+
+        /**
+         * Safely format a number to Nigerian Naira.
+         * @param {number} num 
+         */
+        function formatNaira(num) {
+            return num.toLocaleString('en-NG');
+        }
+
+        // --- A. Sticky Header Logic (Announcement Bar, CTA Bar, Scroll Logic) ---
+
+        let announcementIndex = 0;
+        let lastScrollTop = 0;
+        const announcementBar = document.getElementById('announcement-bar');
+        const announcementText = document.getElementById('announcement-text');
+        const ctaBarWrapper = document.getElementById('cta-bar-wrapper');
+        const ctaBarButton = document.getElementById('cta-bar-button');
+        let headerHeight = 0; // Will be calculated in window.onload
+        
+        /**
+         * Rotates the social proof announcements.
+         */
+        function rotateAnnouncement() {
+            const announcement = ANNOUNCEMENTS[announcementIndex];
+            announcementText.textContent = announcement.text;
+            
+            // Add alert styling for urgent messages
+            if (announcement.alert) {
+                announcementBar.classList.add('bg-yellow-400', 'text-red-900', 'font-extrabold');
+                announcementBar.classList.remove('bg-red-600', 'text-white');
+            } else {
+                announcementBar.classList.remove('bg-yellow-400', 'text-red-900', 'font-extrabold');
+                announcementBar.classList.add('bg-red-600', 'text-white');
+            }
+
+            announcementIndex = (announcementIndex + 1) % ANNOUNCEMENTS.length;
+        }
+
+        /**
+         * Manages the visibility and scroll effect of the CTA bar.
+         */
+        function handleScroll() {
+            const st = window.scrollY || document.documentElement.scrollTop;
+
+            if (st > lastScrollTop) { // Down-scroll (hiding the bar)
+                ctaBarWrapper.style.transform = `translateY(-${ctaBarWrapper.offsetHeight}px)`;
+                ctaBarButton.classList.remove('cta-btn-visible');
+            } else { // Up-scroll (showing the bar)
+                // When scrolling up, first make the button visible
+                if (st < lastScrollTop - 50) { // check for a decent scroll up magnitude
+                    ctaBarButton.classList.add('cta-btn-visible');
+                }
+                // Then make the wrapper visible
+                if (st < headerHeight) {
+                    ctaBarWrapper.style.transform = `translateY(0)`;
+                } else if (st < lastScrollTop) {
+                    // Only show the wrapper if the user scrolls significantly up
+                    ctaBarWrapper.style.transform = `translateY(0)`;
+                }
+            }
+            lastScrollTop = st <= 0 ? 0 : st;
+        }
+        
+        /**
+         * Initializes and runs the Countdown Timer.
+         */
+        function startCountdown() {
+            // Set a static end time for demonstration (e.g., 1 hour from now)
+            let endTime = new Date();
+            endTime.setHours(endTime.getHours() + 1); 
+            const countdownEl = document.getElementById('countdown');
+
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                const distance = endTime.getTime() - now;
+
+                if (distance < 0) {
+                    // Timer expired, reset the end time for another hour
+                    endTime = new Date();
+                    endTime.setHours(endTime.getHours() + 1);
+                    return;
+                }
+
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const timeString = 
+                    String(hours).padStart(2, '0') + ":" + 
+                    String(minutes).padStart(2, '0') + ":" + 
+                    String(seconds).padStart(2, '0');
+
+                countdownEl.textContent = timeString;
+            };
+
+            updateTimer();
+            setInterval(updateTimer, 1000);
+        }
+        
+        /**
+         * Toggles Dark Mode theme.
+         */
+        function toggleDarkMode() {
+            const isDark = document.body.classList.toggle('dark');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            
+            if (isDark) {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            } else {
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+            }
+        }
+
+
+        // --- B. Core Body Logic ---
+
+        // B1. 3D Flip Card Logic
+        let isFlipped = false;
+        let flipInterval;
+        const flipCardEl = document.getElementById('flip-card');
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            flipCardEl.classList.toggle('flipped');
+            // Reset the auto-flip timer on manual click
+            clearInterval(flipInterval);
+            flipInterval = setInterval(flipCard, 5000);
+        }
+
+        // B5. Image Carousel Logic
+        let carouselIndex = 0;
+        let carouselTimer;
+        const carouselTrack = document.getElementById('carousel-track');
+        const carouselItems = document.querySelectorAll('.carousel-item');
+        const numItems = carouselItems.length;
+        const carouselDotsContainer = document.getElementById('carousel-dots');
+
+        function moveCarousel(direction) {
+            carouselIndex = (carouselIndex + direction + numItems) % numItems;
+            updateCarousel();
+            // Reset auto-slide timer
+            clearInterval(carouselTimer);
+            carouselTimer = setInterval(() => moveCarousel(1), 7000);
+        }
+
+        function updateCarousel() {
+            const offset = -carouselIndex * 100;
+            carouselTrack.style.transform = `translateX(${offset}%)`;
+            updateDots();
+        }
+
+        function updateDots() {
+            carouselDotsContainer.innerHTML = '';
+            for (let i = 0; i < numItems; i++) {
+                const dot = document.createElement('span');
+                dot.className = `w-3 h-3 mx-1 rounded-full cursor-pointer transition-colors duration-300 ${i === carouselIndex ? 'bg-red-600' : 'bg-white bg-opacity-70'}`;
+                dot.onclick = () => {
+                    carouselIndex = i;
+                    updateCarousel();
+                    clearInterval(carouselTimer);
+                    carouselTimer = setInterval(() => moveCarousel(1), 7000);
+                };
+                carouselDotsContainer.appendChild(dot);
+            }
+        }
+        
+        // B7. Quantity Selection Logic (Main Body)
+
+        function renderQuantityOptions() {
+            const container = document.getElementById('quantity-options');
+            const modalContainer = document.getElementById('modal-quantity-options');
+            container.innerHTML = '';
+            modalContainer.innerHTML = '';
+
+            OFFERS.forEach(offer => {
+                const savings = formatNaira(offer.savings);
+                const priceNaira = formatNaira(offer.price);
+
+                // Main body card for B7
+                const card = document.createElement('div');
+                card.id = `qty-card-${offer.id}`;
+                card.className = `bg-white p-6 rounded-xl shadow-lg transition-all duration-300 border-4 border-transparent cursor-pointer hover:shadow-2xl`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-3xl font-extrabold text-red-600">${offer.qty} Unit${offer.qty > 1 ? 's' : ''}</h3>
+                        ${offer.savings > 0 ? `<span class="bg-red-600 text-white font-bold text-sm px-3 py-1 rounded-full">Save ₦${savings}</span>` : ''}
+                    </div>
+                    <p class="text-5xl font-black text-gray-900 mb-2">₦${priceNaira}</p>
+                    <p class="text-sm text-gray-500 mb-4">${offer.promo}</p>
+                    <p class="text-gray-700">${offer.description}</p>
+                `;
+                card.onclick = () => selectQuantity(offer.id);
+                container.appendChild(card);
+
+                // Modal Radio button for Form 1
+                const modalOption = document.createElement('label');
+                modalOption.className = 'flex items-center space-x-3 bg-white p-4 rounded-xl border border-gray-300 shadow-sm hover:border-red-500 cursor-pointer';
+                modalOption.innerHTML = `
+                    <input type="radio" name="modal_quantity" value="${offer.id}" class="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300" required>
+                    <div>
+                        <span class="font-bold text-lg">${offer.qty} Unit${offer.qty > 1 ? 's' : ''} - ₦${priceNaira}</span>
+                        ${offer.savings > 0 ? `<span class="text-sm text-green-600 ml-2">(You save ₦${savings})</span>` : ''}
+                    </div>
+                `;
+                modalOption.querySelector('input').addEventListener('change', (e) => updateModalSummary(e.target.value));
+                modalContainer.appendChild(modalOption);
+            });
+        }
+
+        function selectQuantity(id) {
+            selectedQuantityId = id;
+            document.querySelectorAll('#quantity-selection-section > div > div').forEach(card => {
+                card.classList.remove('quantity-highlight', 'border-red-600');
+                card.classList.add('border-transparent');
+            });
+            document.getElementById(`qty-card-${id}`).classList.add('quantity-highlight', 'border-red-600');
+            
+            // Update Form 2 hidden fields immediately
+            updateForm2Fields(id);
+        }
+
+        function getSelectedOffer(id) {
+            return OFFERS.find(o => o.id === id);
+        }
+
+        // --- C. Order Forms Logic ---
+
+        /**
+         * Opens Form 1 Modal and sets the trigger source.
+         * @param {string} source 
+         */
+        function openModal(source) {
+            document.getElementById('form-1-source').value = source;
+            document.getElementById('order-modal').classList.remove('hidden');
+            
+            // Set first radio option as default if nothing is selected
+            const firstRadio = document.querySelector('#modal-quantity-options input[type="radio"]');
+            
+            let defaultId = selectedQuantityId || (firstRadio ? firstRadio.value : null);
+            
+            if (defaultId) {
+                // Check the radio button in the modal corresponding to the selection in the body (or the first option)
+                const radioToSelect = document.querySelector(`#modal-quantity-options input[value="${defaultId}"]`);
+                if (radioToSelect) {
+                    radioToSelect.checked = true;
+                    updateModalSummary(defaultId);
+                }
+            }
+        }
+
+        /**
+         * Closes Form 1 Modal if background is clicked.
+         * @param {Event} event 
+         */
+        function closeModal(event) {
+            if (event.target.id === 'order-modal') {
+                document.getElementById('order-modal').classList.add('hidden');
+            }
+        }
+
+        /**
+         * Updates the price summary and hidden fields in Form 1 Modal.
+         * @param {string} id 
+         */
+        function updateModalSummary(id) {
+            const offer = getSelectedOffer(id);
+            if (offer) {
+                document.getElementById('modal-price-summary').innerHTML = 
+                    `TOTAL PRICE: ₦${formatNaira(offer.price)} (FREE Delivery Included)`;
+                document.getElementById('modal-total-price').textContent = formatNaira(offer.price);
+                document.getElementById('form-1-quantity-id').value = id;
+                document.getElementById('form-1-price-total').value = offer.price;
+            }
+        }
+
+        /**
+         * Updates the hidden fields and summary for Form 2 (final section).
+         * @param {string} id 
+         */
+        function updateForm2Fields(id) {
+            const offer = getSelectedOffer(id);
+            const summaryEl = document.getElementById('selected-qty-summary-final');
+
+            if (offer) {
+                document.getElementById('form-2-quantity-id').value = id;
+                document.getElementById('form-2-price-total').value = offer.price;
+                summaryEl.innerHTML = `You have selected the <strong>${offer.promo} (${offer.qty} Unit${offer.qty > 1 ? 's' : ''})</strong> for a total of <strong>₦${formatNaira(offer.price)}</strong>. Complete your delivery details below.`;
+            } else {
+                 summaryEl.innerHTML = `<span class="text-xl text-red-500">Please select a quantity from the section above before submitting.</span>`;
+            }
+        }
+
+        /**
+         * Handles validation and submission for Form 2.
+         * @param {Event} e 
+         */
+        function handleForm2Submission(e) {
+            if (!selectedQuantityId) {
+                e.preventDefault();
+                
+                const qtySection = document.getElementById('quantity-selection-section');
+                
+                // 1. Scroll to the section
+                qtySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // 2. Temporarily highlight the section
+                qtySection.classList.add('quantity-highlight');
+                
+                // 3. Update the final form summary to prompt selection
+                document.getElementById('selected-qty-summary-final').innerHTML = 
+                    `<span class="text-xl text-red-600 font-extrabold">🚨 STOP! Please select one of the packs above first.</span>`;
+
+                // Remove highlight after 3 seconds
+                setTimeout(() => {
+                    qtySection.classList.remove('quantity-highlight');
+                }, 3000);
+            } else {
+                // If quantity is selected, ensure the hidden fields are updated one last time
+                updateForm2Fields(selectedQuantityId);
+                // Redirect to thankyou-page.html after submission
+                e.currentTarget.action = 'thankyou-page.html'; 
+            }
+        }
+        
+        // --- Initialization ---
+
+        window.onload = function() {
+            // Calculate header height now that elements are rendered
+            headerHeight = announcementBar.offsetHeight + ctaBarWrapper.offsetHeight;
+            
+            // A. Sticky Header Initialization
+            const firstAnnouncementIndex = ANNOUNCEMENTS.findIndex(a => a.initial);
+            announcementIndex = firstAnnouncementIndex !== -1 ? firstAnnouncementIndex : 0;
+            rotateAnnouncement();
+            setInterval(rotateAnnouncement, 10000); // 10 seconds per announcement
+            
+            window.addEventListener('scroll', handleScroll);
+            startCountdown();
+
+            // Force CTA button to initially be hidden below the bar
+            ctaBarButton.classList.remove('cta-btn-visible');
+
+            // B. Core Body Initialization
+            
+            // B1. 3D Flip Card
+            flipInterval = setInterval(flipCard, 5000);
+
+            // B5. Carousel
+            renderQuantityOptions();
+            updateCarousel(); // Initial rendering of the carousel and dots
+            carouselTimer = setInterval(() => moveCarousel(1), 7000);
+
+            // B7. Quantity Selection
+            
+            // C. Form Initialization
+            document.getElementById('form-2-submission').addEventListener('submit', handleForm2Submission);
+            
+            // Set default quantity selection on load
+            selectQuantity('qty2'); // Default to the 'Most popular option'
+            
+            // Force Form 1 submission to redirect to thankyou-page.html (Formspree alternative)
+            document.getElementById('form-1-submission').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                const data = new FormData(form);
+                
+                let isValid = true;
+                form.querySelectorAll('input[required], textarea[required]').forEach(input => {
+                    if (!input.value) isValid = false;
+                });
+                
+                // Also check if a quantity is selected in the modal
+                if (!document.querySelector('#modal-quantity-options input[name="modal_quantity"]:checked')) {
+                    isValid = false;
+                    // Provide visual feedback if a quantity is not selected (optional: highlight the section)
+                    document.getElementById('modal-quantity-options').style.border = '2px solid red';
+                    setTimeout(() => document.getElementById('modal-quantity-options').style.border = 'none', 1000);
+                }
+
+
+                if (!isValid) {
+                    console.error("Please fill all required fields and select a quantity in the modal.");
+                    return;
+                }
+                
+                window.location.href = 'thankyou-page.html'; // Redirect
+            });
+
+        };
+
+    </script>
+</body>
+</html>

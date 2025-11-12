@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed - Manager's Office</title>
+    <style>
+        /* --- DESIGN VARIABLES (LIGHT MODE) --- */
+        :root {
+            --background: 30 40% 97%;
+            --foreground: 220 40% 12%;
+            --card: 0 0% 100%;
+            --card-foreground: 220 40% 12%;
+            --primary: 12 88% 59%; /* Orange/Red */
+            --primary-foreground: 0 0% 100%;
+            --secondary: 174 72% 46%; /* Teal/Green */
+            --secondary-foreground: 0 0% 100%;
+            --muted: 30 20% 90%;
+            --muted-foreground: 220 20% 40%;
+            --accent: 45 100% 51%; /* Yellow/Gold */
+            --accent-foreground: 220 40% 12%;
+            --border: 30 30% 88%;
+            --ring: 12 88% 59%;
+            --radius: 0.75rem;
+
+            /* Gradients */
+            --gradient-cta: linear-gradient(135deg, hsl(12 88% 59%), hsl(25 95% 53%), hsl(45 100% 51%));
+            --gradient-bg: linear-gradient(180deg, hsl(30 40% 97%), hsl(174 40% 95%));
+            
+            /* Shadows & Transitions */
+            --shadow-premium: 0 10px 40px -10px hsl(12 88% 59% / 0.4);
+            --shadow-card: 0 4px 20px hsl(220 40% 12% / 0.08);
+            --shadow-glow: 0 0 30px hsl(12 88% 59% / 0.3);
+            --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* DARK MODE OVERRIDES */
+        .dark {
+            --background: 220 40% 12%;
+            --foreground: 30 40% 97%;
+            --card: 220 35% 16%;
+            --card-foreground: 30 40% 97%;
+            --muted: 220 30% 20%;
+            --muted-foreground: 220 20% 65%;
+            --border: 220 30% 20%;
+            --gradient-bg: linear-gradient(180deg, hsl(220 40% 12%), hsl(220 35% 16%));
+            --shadow-premium: 0 10px 40px -10px hsl(12 88% 59% / 0.5);
+            --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
+            --shadow-glow: 0 0 40px hsl(12 88% 59% / 0.4);
+        }
+
+        /* GLOBAL BASE STYLES */
+        * { 
+            box-sizing: border-box; 
+            border-color: hsl(var(--border)); 
+            line-height: 1.5; 
+        }
+        html, body { height: 100%; }
+        body {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--gradient-bg); 
+            margin: 0;
+            padding: 0; /* Removing original padding */
+            display: block; /* Removing flex centering from body */
+            min-height: 100vh;
+            padding-top: 5rem; /* Add padding to account for fixed top bar */
+        }
+
+        /* --- NEW: Top Bar Styling --- */
+        #top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5rem; /* 80px */
+            background-color: hsl(var(--card) / 0.95); /* Semi-transparent card background */
+            border-bottom: 1px solid hsl(var(--border));
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 10px hsl(var(--foreground) / 0.05);
+        }
+        .dark #top-bar {
+            background-color: hsl(var(--card) / 0.9);
+            box-shadow: 0 2px 10px hsl(var(--foreground) / 0.2);
+        }
+
+
+        /* UTILITIES */
+        .container-wrapper { 
+            width: 100%; 
+            max-width: 600px; 
+            margin: 40px auto; /* Center card vertically with margin */
+            padding: 0 20px; /* Horizontal padding for the content wrapper */
+            text-align: center; 
+        }
+        
+        /* Premium Card Styling (from .card-premium) */
+        .card-premium {
+            background-color: hsl(var(--card));
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            border: 1px solid hsl(var(--border));
+            transition: var(--transition-smooth);
+            padding: 1.5rem;
+        }
+        
+        /* Standard Button Styling */
+        .btn-standard {
+            background: hsl(var(--primary));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1.125rem;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: block; /* Full width button */
+            width: 100%;
+            box-shadow: 0 4px 15px -5px hsl(var(--primary) / 0.5);
+            
+        }
+
+        .btn-standard:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Delivery Block Styling - Prominent Delivery Info */
+        .delivery-info {
+            background-color: hsl(var(--secondary) / 0.1); /* Light tint of secondary color */
+            border: 2px solid hsl(var(--secondary) / 0.5);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px hsl(var(--secondary) / 0.1);
+            transition: var(--transition-smooth);
+        }
+        .dark .delivery-info {
+            background-color: hsl(var(--secondary) / 0.2);
+            box-shadow: 0 4px 15px hsl(var(--secondary) / 0.3);
+        }
+
+        /* --- 3D TILT BUTTON (Manager's Office) - Focal Point --- */
+        #manager-office-btn {
+            background: var(--gradient-cta);
+            color: hsl(var(--card));
+            font-size: 1.5rem; /* Slightly smaller for mobile/desktop balance */
+            font-weight: 900;
+            padding: 2.5rem 1rem;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            margin-top: 2rem;
+            /* Initial 3D settings for the JS effect */
+            perspective: 1000px;
+            transform-style: preserve-3d;
+            /* JS will set the box-shadow and dynamic transform */
+            transition: transform 0.1s ease-out, box-shadow 0.1s ease-out; 
+            text-decoration: none;
+        }
+        
+        /* Desktop/Larger Font */
+        @media (min-width: 640px) {
+            #manager-office-btn {
+                font-size: 2.25rem;
+                padding: 3rem 1rem;
+            }
+            .text-6xl { font-size: 4rem; }
+        }
+
+        /* Adjust theme toggle for new position */
+        #theme-toggle {
+            /* Removed fixed positioning as it's now inside the flex top bar */
+            position: static; 
+            z-index: initial;
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground">
+
+    <!-- NEW: TOP BAR (HEADER) -->
+    <header id="top-bar">
+        <!-- 1. Theme Toggle (Moved to the left) -->
+        <div id="theme-toggle">
+            <button id="theme-btn" class="card-premium p-2" style="border-radius: 9999px;">
+                <!-- Sun Icon -->
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--accent))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="M4.93 19.07l1.41-1.41"/><path d="M17.66 6.34l1.41-1.41"/></svg>
+                <!-- Moon Icon (Hidden by default) -->
+                <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--accent))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6" style="display: none;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+        </div>
+
+        <!-- 2. Simple Title/Brand Area -->
+        <div style="font-weight: 700; font-size: 1.25rem; color: hsl(var(--primary));">
+            Sales Confirmation
+        </div>
+
+        <!-- 3. Spacer for balance (or add more links/buttons here) -->
+        <div style="width: 50px;"></div>
+    </header>
+
+
+    <div class="container-wrapper card-premium">
+        
+        <!-- Thank You Message -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--secondary))" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><polyline points="20 6 9 17 4 12"/></svg>
+        <h1 class="text-6xl font-bold text-primary" style="margin: 0;">Order Confirmed!</h1>
+        <p class="text-3xl text-secondary" style="margin-top: 0.5rem; font-weight: 500;">Your purchase is on its way.</p>
+
+        <!-- Delivery Information Block (PROMINENT) -->
+        <div class="delivery-info">
+            <!-- Truck Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-7 w-7 text-secondary" style="vertical-align: middle; margin-right: 0.5rem;"><path d="M10 17H6l-3-3V7a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v7h-6"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+            <p class="text-lg font-bold text-secondary" style="display: inline-block;">Guaranteed Delivery Time:</p>
+            <p class="text-4xl font-extrabold text-foreground" style="margin-top: 0.5rem; letter-spacing: -1px;">2-3 Business Days</p>
+            <p style="font-size: 0.95rem; margin-top: 1rem; color: hsl(var(--muted-foreground));">
+                Your order is being processed and you will receive a confirmation call within **12 hours**.
+            </p>
+        </div>
+
+        <div class="space-y-4" style="margin-top: 3rem;">
+            
+            <!-- Button 1: Standard button linking back to Page 1 -->
+            <a href="index.html" class="btn-standard">
+                Continue Shopping
+            </a>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 600; color: hsl(var(--foreground));">— OR —</h3>
+            
+            <!-- Button 2 (Focal Point): Manager's Office with Dynamic 3D Tilt -->
+            <a href="managers-office.html" id="manager-office-btn" class="card-premium">
+                MANAGER'S OFFICE
+            </a>
+            <p style="font-size: 0.95rem; color: hsl(var(--muted-foreground));">
+                <span class="text-primary font-bold">Recommended:</span> Explore exclusive deals and premium support in the Manager's Office.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const themeBtn = document.getElementById('theme-btn');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            const managerBtn = document.getElementById('manager-office-btn');
+            
+            // --- Theme Toggle Logic ---
+            const updateTheme = (isDark) => {
+                if (isDark) {
+                    body.classList.add('dark');
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    body.classList.remove('dark');
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                }
+            };
+
+            themeBtn.addEventListener('click', () => {
+                const isDark = !body.classList.contains('dark');
+                updateTheme(isDark);
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            updateTheme(savedTheme === 'dark' || (!savedTheme && prefersDark));
+
+            // --- Dynamic 3D Tilt Effect Logic ---
+
+            const initialBoxShadow = '0 15px 50px -10px hsl(45 100% 51% / 0.7)';
+            
+            // Set initial shadow explicitly for smooth reset
+            managerBtn.style.boxShadow = initialBoxShadow;
+
+            const handleMouseMove = (e) => {
+                const rect = managerBtn.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                // Max rotation of 5 degrees
+                const maxRotate = 5; 
+                
+                // Calculate rotation based on cursor position relative to center
+                const rotateY = -((x - centerX) / centerX) * maxRotate; // Tilt right when mouse is on the left
+                const rotateX = ((y - centerY) / centerY) * maxRotate;  // Tilt up when mouse is on the bottom
+
+                // Calculate shadow shift for depth effect (max 10px shift)
+                const shadowX = -((x - centerX) / centerX) * 8;
+                const shadowY = -((y - centerY) / centerY) * 8;
+
+                // Apply dynamic transform and shadow
+                managerBtn.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                
+                // Dynamic shadow to enhance the 3D effect
+                managerBtn.style.boxShadow = `${shadowX}px ${shadowY}px 40px -5px hsl(45 100% 51% / 0.9)`;
+            };
+
+            const handleMouseLeave = () => {
+                // Reset transform and shadow
+                managerBtn.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+                managerBtn.style.boxShadow = initialBoxShadow;
+            };
+
+            managerBtn.addEventListener('mousemove', handleMouseMove);
+            managerBtn.addEventListener('mouseleave', handleMouseLeave);
+        });
+    </script>
+</body>
+</html>
